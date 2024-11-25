@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Freelancer
+from .models import *
 
 
-admin.site.register(Freelancer)
+admin.site.register(User)
+admin.site.register(EmployeeProfile)
+admin.site.register(EmployerProfile)

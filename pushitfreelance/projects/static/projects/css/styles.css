@@ -1,0 +1,67 @@
+/* === Общие стили для страницы проектов === */
+
+/* Стили для заголовка страницы */
+h1 {
+    font-size: 32px;
+    color: #343a40;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Стили для параграфа с количеством проектов */
+p {
+    font-size: 18px;
+    color: #6c757d;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Стили для списка проектов */
+ul {
+    list-style-type: none;
+    padding: 0;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+li {
+    background-color: #f8f9fa;
+    margin-bottom: 15px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+li:hover {
+    background-color: #e9ecef;
+}
+
+li a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+li a:hover {
+    color: #0056b3;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 28px;
+    }
+
+    p {
+        font-size: 16px;
+    }
+
+    li {
+        padding: 10px 15px;
+    }
+
+    li a {
+        font-size: 18px;
+    }
+}

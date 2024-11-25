@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Проекты{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'projects/css/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include 'header.html' %}
+    <h1>Доступные проекты</h1>
+    <p>Всего доступно: {{ projects|length }}</p>
+    <ul>
+        {% for project in projects %}
+            <li>
+                <a href="{% url 'project' project.id %}">{{ project.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
