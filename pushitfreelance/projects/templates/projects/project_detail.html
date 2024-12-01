@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}{{ project.title }}{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'projects/css/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include 'header.html' %}
+    <h1>{{ project.title }}</h1>
+    <p>{{ project.description }}</p>
+    <p>Стоимость: {{ project.price }} руб.</p>
+    <p>Сроки: {{ project.deadline }}</p>
+    <p>Заказчик: {{ project.customer }}</p>
+    <p>Исполнитель: {{ project.executor }}</p>
+    <p>Статус: {{ project.status }}</p>
+    <p>Создан: {{ project.created_at|date:"d.m.Y H:i" }}</p>
+    <p>Обновлен: {{ project.updated_at|date:"d.m.Y H:i" }}</p>
+    <p>Категория: {{ project.category }}</p>
+    <p>Теги: {{ project.tags }}</p>
+    <p>Файлы: {{ project.files }}</p>
+    <p>Комментарии:</p>
+    <ul>
+        {% for comment in project.comments.all %}
+            <li>{{ comment.author }}: {{ comment.text }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'projects' %}">Вернуться к списку проектов</a>
+{% endblock %}

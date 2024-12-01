@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Вход{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'users/css/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include 'header.html' %}
+    <h1>Вход</h1>
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Пароль:</label><br>
+        <input type="password" id="password" name="password" required><br>
+        <input type="submit" value="Войти">
+    </form>
+    <a href="{% url 'register' %}">Зарегистрироваться</a>
+{% endblock %}
