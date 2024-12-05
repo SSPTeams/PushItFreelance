@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-u-@x)wsixbk$3&%rz&w-ui-sj!#-gx087qw--vc)-=sjxhse%2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,8 +38,22 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "users.apps.UsersConfig",
+    'rest_framework',
+    'rest_framework.authtoken',
     "projects"
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',  # для токенов
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',  # для JWT
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -124,3 +138,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"  # Папка для команды colle
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = 'users.User'
+
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://14b3-195-123-217-237.ngrok-free.app',
+]
+
+TELEGRAM_BOT_TOKEN='7000214974:AAG5-_X5nSA3WNWLKeBZ385m7U_1WITL84g'

@@ -1,0 +1,5 @@
+django
+djoser
+djangorestframework
+markdown
+django-filter
