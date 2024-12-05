@@ -1,68 +1,52 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
-from django.views import View
-from django.views.generic import ListView, DetailView
+from django.http import JsonResponse
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 
 from .models import Project
-from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets, views
+
+from .serializers import ProjectSerializer
+from rest_framework import permissions
+from .filters import ProjectFilter
 
 
-# Create your views here.
-'''
-@login_required
-def get_projects(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        budget = request.POST.get("budget")
-        deadline = request.POST.get("deadline")
-        project = Project.objects.create(
-            title=title,
-            description=description,
-            budget=budget,
-            deadline=deadline
-        )
-        return render(request, "projects/project_template.html", {"project": project})
-    elif request.method == "GET":
-    projects = Project.objects.all()
-    return render(request, "projects/projects_list.html", {"projects": projects})
-
-
-def get_project(request, pk):
-    project = Project.objects.get(pk=pk)
-    return render(request, "projects/project_template.html", {"project": project})
 
 '''
-
-
-class ProjectView(View):
-    def get(self, request):
+class ProjectView(views.APIView):
+    def get(self):
         projects = Project.objects.all()
-        return render(request, "projects/projects_list.html", {"projects": projects})
-
-
-
-
-class ProjectListView(ListView):
-    model = Project
-    template_name = 'projects/projects_list.html'
-    context_object_name = 'projects'
-    paginate_by = 10
-    
-    
-class ProjectDetailView(LoginRequiredMixin, DetailView):
-    model = Project
-    template_name = 'projects/project_detail.html'
-    context_object_name = 'project'
-
+        return projects
 '''
-class ProjectCreateView(CreateView):
-    model = Project
-    template_name = 'projects/project_form.html'
-    fields = ['title', 'description', 'budget', 'deadline']
-    success_url = reverse_lazy('project_list')
 
-    def form_valid(self, form):
-        form.instance.employer = self.request.user.employerprofile  # Предполагаем, что у пользователя есть профиль работодателя
-        return super().form_valid(form)
-'''
+
+
+
+class ProjectViewSet(viewsets.ModelViewSet):
+    serializer_class = ProjectSerializer
+    queryset = Project.objects.all()
+    permission_classes = [permissions.AllowAny]
+
+
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['description']  # Поле для поиска по описанию
+    filterset_class = ProjectFilter
+
+
+    @action(detail=True, methods=['post'])
+    def confirm(self, request, pk=None):
+        project = self.get_object()
+        project.is_confirmed = True
+        project.save()
+
+        # notify employer
+        # notify freelancers
+
+
+        return JsonResponse({'status': 'ok'})
+
+
+
+class Meta:
+        model = Project
+        fields = '__all__'

@@ -3,3 +3,4 @@ djoser
 djangorestframework
 markdown
 django-filter
+drf-yasg

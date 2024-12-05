@@ -9,6 +9,8 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    is_confirmed = models.BooleanField(default=False)
+
     employer = models.ForeignKey("users.EmployerProfile", on_delete=models.SET_NULL, blank=True, null=True)
     employee = models.ForeignKey("users.EmployeeProfile", on_delete=models.SET_NULL, blank=True, null=True)
 
