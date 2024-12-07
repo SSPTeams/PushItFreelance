@@ -1,12 +1,14 @@
-from django.urls import path
-from .views import *
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import UserViewSet, EmployeeProfileView, EmployerProfileView
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+
 
 
 urlpatterns = [
-    path("", UserView.as_view(), name="users"),
-    path("register/", RegisterView.as_view(), name="register"),
-    path("<int:pk>/", UserDetailView.as_view(), name="user"),
-    path("telegram/auth/", TelegramAuthView.as_view(), name="telegram_auth"),
-    path("login/", UserLoginView.as_view(), name="login"),
-    path("logout/", UserLogoutView.as_view(), name="logout"),
+    path('', include(router.urls)),
+    path('<int:user_id>/employee-profile/', EmployeeProfileView.as_view(), name='user-employee-profile'),
+    path('<int:user_id>/employer-profile/', EmployerProfileView.as_view(), name='user-employer-profile'),
 ]

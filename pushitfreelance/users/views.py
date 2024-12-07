@@ -1,55 +1,4 @@
-from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
-
-from users.forms import UserForm
-from users.models import User
-
-
-class UserView(View):
-    def get(self, request):
-        users = User.objects.all()
-        return render(request, "users/users_list.html", {"users": users})
-
-
-
-class RegisterView(View):
-    form_class = UserForm
-
-    def get(self, request):
-        form = self.form_class()
-        return render(request, "auth/register.html", {"form": form})
-
-    @csrf_exempt
-    def post(self, request):
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        user = User.objects.create_user(username=username, email=email, password=password)
-        return HttpResponse(f"User {user.username} created successfully!")
-
-
-class UserDetailView(View):
-    def get(self, request, pk):
-        user = User.objects.get(pk=pk)
-        return render(request, "users/user_template.html", {"user": user})
-
-
-class UserLoginView(LoginView):
-    template_name = 'auth/login.html'
-    fields = '__all__'
-    redirect_authenticated_user = True
-
-    def get_success_url(self):
-        return reverse_lazy('projects')
-
-class UserLogoutView(LogoutView):
-    next_page = 'login'
-
-
 from django.views import View
 from django.http import JsonResponse
 from django.contrib.auth import login
@@ -58,6 +7,113 @@ import hashlib
 import hmac
 import time
 import json
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import action
+from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+
+from .models import User, EmployeeProfile, EmployerProfile
+from .serializers import UserSerializer, EmployeeProfileSerializer, EmployerProfileSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        # Регистрация доступна всем, а остальные действия — только аутентифицированным пользователям
+        if self.action in ['create']:
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                "message": "User registered successfully",
+                "token": token.key,
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "telegram_id": user.telegram_id,
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        # Возвращаем данные текущего пользователя
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def change_password(self, request):
+        # Позволяет сменить пароль
+        user = request.user
+        password = request.data.get('password')
+        if not password:
+            return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(password)
+        user.save()
+        return Response({"message": "Password updated successfully"})
+
+
+class EmployeeProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        profile = EmployeeProfile.objects.filter(user_id=user_id).first()
+        if not profile:
+            return Response({"detail": "Not found"}, status=404)
+        serializer = EmployeeProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def post(self, request, user_id):
+        # Создание или обновление единственного профиля для user_id
+        profile, created = EmployeeProfile.objects.get_or_create(user_id=user_id)
+        serializer = EmployeeProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201 if created else 200)
+        return Response(serializer.errors, status=400)
+
+    def patch(self, request, user_id):
+        profile = EmployeeProfile.objects.filter(user_id=user_id).first()
+        if not profile:
+            return Response({"detail": "Not found"}, status=404)
+        serializer = EmployeeProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+
+class EmployerProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        profile = EmployerProfile.objects.filter(user_id=user_id).first()
+        if not profile:
+            return Response({"detail": "Not found"}, status=404)
+        serializer = EmployerProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def post(self, request, user_id):
+        # Создание или обновление единственного профиля для user_id
+        profile, created = EmployerProfile.objects.get_or_create(user_id=user_id)
+        serializer = EmployerProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201 if created else 200)
+        return Response(serializer.errors, status=400)
+
+
+
 
 class TelegramAuthView(View):
     def post(self, request):

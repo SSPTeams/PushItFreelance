@@ -12,15 +12,6 @@ from .filters import ProjectFilter
 
 
 
-'''
-class ProjectView(views.APIView):
-    def get(self):
-        projects = Project.objects.all()
-        return projects
-'''
-
-
-
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
@@ -29,24 +20,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['description']  # Поле для поиска по описанию
+    search_fields = ['description']
     filterset_class = ProjectFilter
 
 
-    @action(detail=True, methods=['post'])
-    def confirm(self, request, pk=None):
-        project = self.get_object()
-        project.is_confirmed = True
-        project.save()
-
-        # notify employer
-        # notify freelancers
-
-
-        return JsonResponse({'status': 'ok'})
-
-
-
-class Meta:
-        model = Project
-        fields = '__all__'
